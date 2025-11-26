@@ -659,9 +659,13 @@ struct server_context {
         const int n_ctx_train = llama_model_n_ctx_train(model);
 
         int n_ctx_slot = llama_n_ctx_seq(ctx);
+        // PATCH: Allow RoPE scaling to work - don't cap slots at training context
+        // if (n_ctx_slot > n_ctx_train) {
+        //     SRV_WRN("the slot context (%d) exceeds the training context of the model (%d) - capping\n", n_ctx_slot, n_ctx_train);
+        //     n_ctx_slot = n_ctx_train;
+        // }
         if (n_ctx_slot > n_ctx_train) {
-            SRV_WRN("the slot context (%d) exceeds the training context of the model (%d) - capping\n", n_ctx_slot, n_ctx_train);
-            n_ctx_slot = n_ctx_train;
+            SRV_INF("slot context (%d) exceeds training context (%d) - using RoPE scaling\n", n_ctx_slot, n_ctx_train);
         }
 
         for (int i = 0; i < params_base.n_parallel; i++) {
